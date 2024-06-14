@@ -38,7 +38,7 @@ devices = torch.cuda.device_count() or 1
 if "20B" in name:
     # single node
     nodes = 1 # max 8 
-    max_tokens = int(1e11) // 5 # 20 billion
+    max_tokens = 924267844 * 2#int(1e11) // 5 # 20 billion
 elif "100B" in name:
     # multi-node
     nodes = 8 # max 8 
@@ -68,7 +68,7 @@ elif "1024x2k" in name:
 learning_rate = 4e-4
 
 total_evals = 400
-warmup_tokens = int(max_tokens * 0.01)
+warmup_tokens = int(max_tokens * 0.1)
 log_step_interval = 1
 eval_iters = total_evals // micro_batch_size # 50 # 25
 save_step_interval = 100
@@ -345,6 +345,7 @@ def create_dataloader(
             seed=seed+fabric.global_rank,
             num_processes=fabric.world_size,
             process_rank=fabric.global_rank,
+            wrap=True
         )
         datasets.append(dataset)
 

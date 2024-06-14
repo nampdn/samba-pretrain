@@ -171,12 +171,13 @@ class PackedDatasetIterator:
         self._buffers = []
 
         if self._n_chunks > len(self._filenames[self._file_idx :]):
-            # if not self._wrap:
-            #     raise StopIteration
+            if not self._wrap:
+                raise StopIteration
             self._file_idx = 0
 
         for i in range(self._n_chunks):
-            filename = self._filenames[self._file_idx + i]
+#             filename = self._filenames[self._file_idx + i]
+            filename = self._filenames[(self._file_idx + i) % len(self._filenames)] if self._wrap else self._filenames[self._file_idx + i]
             if self._dtype is None:
                 self._dtype, self._chunk_size = self._read_header(filename)
                 self._n_blocks = self._chunk_size // self._block_size
