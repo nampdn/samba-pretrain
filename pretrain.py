@@ -46,8 +46,8 @@ elif "100B" in name:
 
 if "512x4k" in name:
     #4k
-    global_batch_size = 24 // nodes
-    micro_batch_size = 4
+    global_batch_size = 512 // nodes
+    micro_batch_size = 16
 elif "256x8k" in name:
     #8k
     global_batch_size = 256 // nodes
@@ -69,9 +69,9 @@ learning_rate = 4e-4
 
 total_evals = 400
 warmup_tokens = int(max_tokens * 0.01)
-log_step_interval = 10
+log_step_interval = 1
 eval_iters = total_evals // micro_batch_size # 50 # 25
-save_step_interval = 1000
+save_step_interval = 100
 eval_step_interval = 1000
 
 num_extrapol = 4
