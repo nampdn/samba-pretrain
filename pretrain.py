@@ -46,8 +46,8 @@ elif "100B" in name:
 
 if "512x4k" in name:
     #4k
-    global_batch_size = 512 // nodes
-    micro_batch_size = 8 
+    global_batch_size = 24 // nodes
+    micro_batch_size = 4
 elif "256x8k" in name:
     #8k
     global_batch_size = 256 // nodes
@@ -92,8 +92,16 @@ log_iter_interval = log_step_interval * gradient_accumulation_steps
 
 # Treat all dataset equally by their size. If you want to use a different weight for a dataset, add it to the list with the weight.
 train_data_config = [
-    ("train_slim", 1.0),
+    ("core", 0.15),
+    ("code", 0.25),
+    ("dictionary", 0.05),
+    ("math", 0.3),
+    ("instruct", 0.25)
 ]
+
+# train_data_config = [
+#     ("dictionary", 1.0),
+# ]
 
 val_data_config = [
     ("validation", 1.0),
@@ -112,6 +120,7 @@ def setup(
     
     strategy = FSDPStrategy(auto_wrap_policy={Block,MBlock}, state_dict_type="full")
     fabric = L.Fabric(devices=devices, strategy=strategy, precision="bf16-mixed", loggers=[wandb_logger])
+    # fabric = L.Fabric(devices=devices, strategy=strategy, precision="bf16-mixed")
     fabric.launch()
     fabric.print(hparams)
     fabric.logger.log_hyperparams(hparams)
@@ -318,6 +327,7 @@ def create_dataloader(
     data_config = train_data_config if split == "train" else val_data_config
     for prefix, _ in data_config:
         filenames = sorted(glob.glob(str(data_dir / f"{prefix}*")))
+        # print(f"Loaded {len(filenames)} files")
         random.seed(seed)
         random.shuffle(filenames)
         if split != "train":
