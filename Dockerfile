@@ -13,9 +13,9 @@ WORKDIR ../layer_norm
 RUN pip install .
 WORKDIR ../xentropy
 RUN pip install .
-RUN pip install causal-conv1d==1.2.0.post2
-RUN pip install mamba-ssm==1.2.0.post1
-RUN pip install -U --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/Triton-Nightly/pypi/simple/ triton-nightly
+#RUN pip install -U --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/Triton-Nightly/pypi/simple/ triton-nightly
 Run pip install einops
 Run pip install opt_einsum
 Run pip install -U git+https://github.com/sustcsonglin/flash-linear-attention
+RUN pip install causal-conv1d">=1.2.0"
+RUN pip install mamba-ssm
