@@ -27,8 +27,8 @@ from lit_gpt import FusedCrossEntropyLoss
 import random
 import os
 
-model_name = "Samba_421M" # change to "Samba_1.3B" for 1.3B model
-train_config = "tsz512x4k_20B" # chanage to "tsz512x4k_100B" for 1.3B model
+model_name = "Samba_1.3B" # change to "Samba_1.3B" for 1.3B model
+train_config = "tsz512x4k_10B" # chanage to "tsz512x4k_100B" for 1.3B model
 name = train_config +"_" + model_name
 
 out_dir = Path(os.getenv("LIGHTNING_ARTIFACTS_DIR", "out")) / name
@@ -38,7 +38,11 @@ devices = torch.cuda.device_count() or 1
 if "20B" in name:
     # single node
     nodes = 1 # max 8 
-    max_tokens = 924267844 * 2#int(1e11) // 5 # 20 billion
+    max_tokens = int(1e11) // 10#8290368337# 924267844 #int(1e11) // 5 # 20 billion
+elif "10B" in name:
+    # multi-node
+    nodes = 1 # max 8 
+    max_tokens = int(1e11) // 10 # 100 billion
 elif "100B" in name:
     # multi-node
     nodes = 8 # max 8 
@@ -47,7 +51,7 @@ elif "100B" in name:
 if "512x4k" in name:
     #4k
     global_batch_size = 512 // nodes
-    micro_batch_size = 16
+    micro_batch_size = 10
 elif "256x8k" in name:
     #8k
     global_batch_size = 256 // nodes
@@ -68,7 +72,7 @@ elif "1024x2k" in name:
 learning_rate = 4e-4
 
 total_evals = 400
-warmup_tokens = int(max_tokens * 0.1)
+warmup_tokens = int(max_tokens * 0.01)
 log_step_interval = 1
 eval_iters = total_evals // micro_batch_size # 50 # 25
 save_step_interval = 100
@@ -92,11 +96,12 @@ log_iter_interval = log_step_interval * gradient_accumulation_steps
 
 # Treat all dataset equally by their size. If you want to use a different weight for a dataset, add it to the list with the weight.
 train_data_config = [
-    ("core", 0.15),
-    ("code", 0.25),
-    ("dictionary", 0.05),
-    ("math", 0.3),
-    ("instruct", 0.25)
+    ("core", 0.10),
+    ("code", 0.10),
+    ("dictionary", 0.015),
+    ("math", 0.2),
+    ("instruct", 0.285),
+    ("qa", 0.3)
 ]
 
 # train_data_config = [
