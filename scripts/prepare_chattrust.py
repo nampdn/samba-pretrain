@@ -14,11 +14,12 @@ from tqdm import tqdm
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 
-import packed_dataset as packed_dataset
+import lit_gpt.packed_dataset as packed_dataset
 import glob
 from transformers import AutoTokenizer
 
 filename_sets = {
+    "qa": "*.parquet",
     "core": "*.parquet",
     "math": "*.parquet",
     "instruct": "*.parquet",
@@ -34,6 +35,7 @@ def prepare_full(
 
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_repo, trust_remote_code=True)
 
+    count_tokens = 0
     for pattern, glob_pattern in filename_sets.items():
         if match and match not in pattern:
             continue
@@ -67,9 +69,12 @@ def prepare_full(
             texts_tokenized = tokenizer.tokenizer.tokenize(texts)
             for text_ids in tqdm(texts_tokenized):
                 x = np.array(text_ids, dtype=builder.dtype)
+                count_tokens += x.size
                 builder.add_array(x)
 
             builder.write_reminder()
+            print("Total tokens: ", count_tokens)
+    print("Total tokens final: ", count_tokens)
 
 
 # def prepare_full(
